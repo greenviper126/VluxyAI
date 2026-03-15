@@ -599,23 +599,14 @@
       "className": "ServerStorage",
       "children": [
         {
-          "name": "FSM-AI",
+          "name": "VluxyAI",
           "className": "Folder",
           "children": [
             {
               "name": "AITypes",
               "className": "ModuleScript",
               "filePaths": [
-                "src/ServerStorage\\FSM-AI\\AITypes\\init.luau"
-              ],
-              "children": [
-                {
-                  "name": "PathfindingSkeleton",
-                  "className": "ModuleScript",
-                  "filePaths": [
-                    "src/ServerStorage\\FSM-AI\\AITypes\\PathfindingSkeleton.luau"
-                  ]
-                }
+                "src/ServerStorage\\VluxyAI\\AITypes\\init.luau"
               ]
             },
             {
@@ -626,7 +617,7 @@
                   "name": "OldAgent",
                   "className": "ModuleScript",
                   "filePaths": [
-                    "src/ServerStorage\\FSM-AI\\Agents\\OldAgent.luau"
+                    "src/ServerStorage\\VluxyAI\\Agents\\OldAgent.luau"
                   ]
                 }
               ]
@@ -635,7 +626,7 @@
               "name": "Builder",
               "className": "ModuleScript",
               "filePaths": [
-                "src/ServerStorage\\FSM-AI\\Builder.luau"
+                "src/ServerStorage\\VluxyAI\\Builder.luau"
               ]
             },
             {
@@ -646,14 +637,14 @@
                   "name": "RobloxPathfinding",
                   "className": "ModuleScript",
                   "filePaths": [
-                    "src/ServerStorage\\FSM-AI\\Pathfinding\\RobloxPathfinding.luau"
+                    "src/ServerStorage\\VluxyAI\\Pathfinding\\RobloxPathfinding.luau"
                   ]
                 },
                 {
                   "name": "RobloxPathfindingOld",
                   "className": "ModuleScript",
                   "filePaths": [
-                    "src/ServerStorage\\FSM-AI\\Pathfinding\\RobloxPathfindingOld.luau"
+                    "src/ServerStorage\\VluxyAI\\Pathfinding\\RobloxPathfindingOld.luau"
                   ]
                 }
               ]
@@ -666,7 +657,7 @@
                   "name": "Idle",
                   "className": "ModuleScript",
                   "filePaths": [
-                    "src/ServerStorage\\FSM-AI\\States\\Idle.luau"
+                    "src/ServerStorage\\VluxyAI\\States\\Idle.luau"
                   ]
                 }
               ]

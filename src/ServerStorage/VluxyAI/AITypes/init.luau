@@ -1,7 +1,5 @@
 --!strict
 
-local PathfindingSkeleton = require(script.PathfindingSkeleton)
-
 export type PathfindingInfo = {
 	AgentRadius: number?,
 	AgentHeight: number?,

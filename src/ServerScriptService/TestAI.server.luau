@@ -9,7 +9,6 @@ local RobloxPathfinding = require(ServerStorage.VluxyAI.Pathfinding.RobloxPathfi
 --local States = ServerStorage["FSM-AI"].States
 
 local entity = workspace:FindFirstChild("Rig") :: Model
-local target = workspace:FindFirstChild("Target") :: BasePart
 
 -- local ai = Builder.new(entity)
 

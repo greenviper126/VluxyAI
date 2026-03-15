@@ -9,8 +9,7 @@
       
       "$properties": {
         "PlayerCharacterDestroyBehavior": "Enabled",
-        "StreamingEnabled": false,
-        "PathfindingUseImprovedSearch": "Enabled",
+        "StreamingEnabled": false
       }
     },
 

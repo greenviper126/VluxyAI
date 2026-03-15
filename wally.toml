@@ -10,8 +10,6 @@ private = true
 [server-dependencies]
 
 #main:
-#profilestore = "lm-loleris/profilestore@1.0.2" #data store
-#cmdr = "evaera/cmdr@1.12.0" #command console
 
 #optional:
 
@@ -26,35 +24,8 @@ private = true
 [dependencies]
 
 #main:
-#red = "red-blox/red@2.3.0" #secure signals and events
-#ratelimit = "red-blox/ratelimit@1.0.1" #doesn't come with red for some reason
-
 trove = "sleitnick/trove@1.5.0"
 dash = "dev-alastair/dash@1.1.2" #for tables / has intellisense
 promise = "evaera/promise@4.0.0" #for some bug prevention
 
-#typeforge = "cameronpcampbell/typeforge@2.1.0"
-
-
-
-#packet = "rajden28/packet@1.7.3" #networking
-#react-roblox = "jsdotlua/react-roblox@17.2.1" #UI library
-#shake = "sleitnick/shake@1.1.0" #camera shaking
-#stater = "denispionicul/stater@1.0.3" #for monster logic
-
-
-
 #optional:
-#input = "sleitnick/input@2.3.0" #user input
-#Inputter = "adammillsy/inputter@0.1.1" # keybind
-
-#simplespline = "ncxyzero/simplespline-wally@1.0.7" #for cutscenes
-#boattween = "boatbomber/boattween@1.0.1" #more tweening options
-
-#ui-labs = "rocky28447/ui-labs@0.1.0"
-#smartbone-2 = "jakeywastaken/smartbone-2@0.4.2"
-#topbarplus = "aspecky/topbarplus@2.9.3" #real version doesn't work right "1foreverhd/topbarplus@3.0.2"
-
-#these are cool but doesn't work well in VSCode wally setup
-#tweenplus = "levnth/tweenplus@2.11.4" #advanced tweening
-#signalplus = "lightwxve/signalplus@3.5.0"
