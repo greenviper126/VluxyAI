@@ -68,6 +68,8 @@ local Pathfinding = {}
 Pathfinding.__index = Pathfinding
 Pathfinding.PartsFolder = partsFolder
 
+type Trove = typeof(Trove.new())
+
 type self = {
 	entity: Model,
 	primary: BasePart,
@@ -83,10 +85,10 @@ type self = {
 
 	_targetVelocity: Vector3,
 
-	_visualParts: typeof(Trove.new())?,
-	_moveCleaner: typeof(Trove.new())?,
-	_runningCleaner: typeof(Trove.new())?,
-	_cleaner: typeof(Trove.new()),
+	_visualParts: Trove?,
+	_moveCleaner: Trove?,
+	_runningCleaner: Trove?,
+	_cleaner: Trove,
 }
 
 export type Pathfinding = typeof(setmetatable({} :: self, Pathfinding))
@@ -94,7 +96,7 @@ export type Pathfinding = typeof(setmetatable({} :: self, Pathfinding))
 --[[
 	Creates a new Pathfinding object for the given entity. The entity must have a PrimaryPart and a Humanoid.
 
-	@param entity - the Model that the Pathfinding will control
+	@param entity Model - the Model that the Pathfinding will control
 
 	@return Pathfinding - the object
 ]]
@@ -115,7 +117,7 @@ function Pathfinding.new(entity: Model): Pathfinding
 	self.agentSettings = table.clone(DEFAULT_AGENT_SETTINGS)
 	self.pathfindingSettings = table.clone(DEFAULT_PATHFINDING_SETTINGS)
 
-	self._targetPart = self._newBall("Target")
+	self._targetPart = self._cleaner:Add(self._newBall("Target"))
 	self._errorCount = 0
 	self._pathing = false
 	self._targetVelocity = Vector3.zero
@@ -126,7 +128,7 @@ end
 --[[
 	Multiuse part used in path visualization and other stuff.
 
-	@param name - the name of the part to create
+	@param name string - the name of the part to create
 
 	@return BasePart - the created part
 ]]
@@ -152,8 +154,8 @@ end
 --[[
 	Same as what PathfindingService uses for settings for the pathing mesh. Resets settings if no settings are provided.
 
-	@param self - the object
-	@param pathfindingInfo - a table containing the pathfinding info to set
+	@param self Pathfinding - the object
+	@param agentSettings AgentSettings? - a table containing the pathfinding info to set
 
 	@return Pathfinding - the object
 ]]
@@ -178,8 +180,8 @@ end
 --[[
 	Special Settings specific to this class. Resets settings if no settings are provided.
 
-	@param self - the object
-	@param pathfindingSettings - a table containing the pathfinding settings to set
+	@param self Pathfinding - the object
+	@param pathfindingSettings PathfindingSettings? - a table containing the pathfinding settings to set
 
 	@return Pathfinding - the object
 ]]
@@ -204,7 +206,7 @@ end
 --[[
 	Returns whether the agent is currently pathing to the target.
 
-	@param self - the object
+	@param self Pathfinding - the object
 
 	@return boolean - whether the agent is currently pathing
 ]]
@@ -215,7 +217,7 @@ end
 --[[
 	Builds the pathing area for the agent.
 
-	@param self - the object
+	@param self Pathfinding - the object
 
 	@return Pathfinding - the object
 ]]
@@ -226,7 +228,7 @@ end
 --[[
 	Computes the path from the agent to the target. If the path is already computed and the target hasn't changed, it will return the existing path.
 
-	@param self - the object
+	@param self Pathfinding - the object
 
 	@return Path? - the computed path, or nil if failed
 ]]
@@ -255,8 +257,8 @@ end
 --[[
 	Displays the computed path using parts. It will create a part for each waypoint and position it at the waypoint's position. It will also destroy any existing visual parts before creating new ones.
 
-	@param self - the object
-	@param path - the path to visualize
+	@param self Pathfinding - the object
+	@param waypoints { PathWaypoint } - the waypoints of the path to visualize
 
 	@return Pathfinding - the object
 ]]
@@ -290,8 +292,8 @@ end
 --[[
 	Toggles the pathfinding on or off. If on is true, it will run the pathfinding loop. If on is false, it will stop the pathfinding loop.
 
-	@param self - the object
-	@param on - whether to turn on or off the pathfinding
+	@param self Pathfinding - the object
+	@param on boolean - whether to turn on or off the pathfinding
 
 	@return Pathfinding - the object
 ]]
@@ -310,7 +312,7 @@ end
 --[[
 	Runs the pathfinding loop, which will continuously compute paths and move the agent along them until stopped.
 
-	@param self - the object
+	@param self Pathfinding - the object
 
 	@return Pathfinding - the object
 ]]
@@ -355,7 +357,7 @@ end
 --[[
 	Stops the pathfinding loop.
 
-	@param self - the object
+	@param self Pathfinding - the object
 
 	@return Pathfinding - the object
 ]]
@@ -371,8 +373,8 @@ end
 --[[
 	Moves the agent to the specified destination.
 
-	@param self - the object
-	@param destination - the position to move to
+	@param self Pathfinding - the object
+	@param destination Vector3 - the position to move to
 
 	@return Pathfinding - the object
 ]]
@@ -389,8 +391,8 @@ end
 
 	@yields until the path is complete or fails
 
-	@param self - the object
-	@param destination - the position to move to
+	@param self Pathfinding - the object
+	@param destination Vector3 - the position to move to
 
 	@return Pathfinding - the object
 ]]
@@ -407,8 +409,8 @@ end
 --[[
 	Pivots the agent to the specified coordinate.
 
-	@param self - the object
-	@param coordinate - the CFrame to pivot to
+	@param self Pathfinding - the object
+	@param coordinate CFrame - the CFrame to pivot to
 
 	@return Pathfinding - the object
 ]]
@@ -423,8 +425,7 @@ end
 --[[
 	Internal function that removes unnecessary waypoints that are in a straight line to make the path smoother.
 
-	@param self - the object
-	@param waypoints - the waypoints to shave down
+	@param waypoints { PathWaypoint } - the waypoints to shave down
 
 	@return { PathWaypoint } - the shaved down waypoints
 ]]
@@ -463,8 +464,8 @@ end
 --[[
 	Internal function that moves the agent along the given waypoints.
 
-	@param self - the object
-	@param waypoints - the waypoints to move along
+	@param self Pathfinding - the object
+	@param waypoints { PathWaypoint } - the waypoints to move along
 
 	@return Pathfinding - the object
 ]]
@@ -509,7 +510,7 @@ end
 --[[
 	Internal function that handles moving the agent along the computed path and handling path errors.
 
-	@param self - the object
+	@param self Pathfinding - the object
 
 	@return Pathfinding - the object
 ]]
@@ -545,7 +546,7 @@ end
 --[[
 	Returns the magnitude from the agent to the target.
 
-	@param self - the object
+	@param self Pathfinding - the object
 
 	@return number - the magnitude
 ]]
@@ -556,7 +557,7 @@ end
 --[[
 	Returns the distance from the agent to the target along the path. If there is no path, it will return math.huge.
 
-	@param self - the object
+	@param self Pathfinding - the object
 
 	@return number - the distance
 ]]
@@ -577,7 +578,7 @@ end
 --[[
 	Cleans up the object.
 
-	@param self - the object
+	@param self Pathfinding - the object
 ]]
 function Pathfinding.Cleanup(self: Pathfinding)
 	self._cleaner:Destroy()
