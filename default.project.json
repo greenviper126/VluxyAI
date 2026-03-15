@@ -1,0 +1,105 @@
+{
+  "name": "FSM-AI",
+  "tree": {
+    "$className": "DataModel",
+
+    "Workspace": {
+      "$className": "Workspace",
+      "$ignoreUnknownInstances": true,
+      
+      "$properties": {
+        "PlayerCharacterDestroyBehavior": "Enabled",
+        "StreamingEnabled": false,
+        "PathfindingUseImprovedSearch": "Enabled",
+      }
+    },
+
+    "Lighting": {
+      "$className": "Lighting",
+      "$properties": {
+        "Technology": "Future"
+      }
+    },
+
+    "Players": {
+      "$className": "Players",
+      "$properties": {
+        "CharacterAutoLoads": true,
+        "UseStrafingAnimations": false
+      }
+    },
+
+    "ReplicatedFirst": {
+      "$className": "ReplicatedFirst",
+
+      "$path": "src/ReplicatedFirst"
+    },
+
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+
+      "$path": "src/ReplicatedStorage",
+
+      "Packages": {
+        "$path": "packages"
+      }
+    },
+
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+
+      "$path": "src/ServerScriptService"
+    },
+
+    "ServerStorage": {
+      "$className": "ServerStorage",
+
+      "$path": "src/ServerStorage"
+    },
+
+    "StarterGui": {
+      "$className": "StarterGui",
+      "$properties": {
+        "VirtualCursorMode": "Disabled"
+      }
+    },
+
+    "SoundService": {
+      "$className": "SoundService",
+      "$properties": {
+        "VolumetricAudio": "Enabled"
+      }
+    },
+
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "$properties": {
+        "HealthDisplayDistance": 0,
+        "NameDisplayDistance": 0,
+        "CameraMaxZoomDistance": 90,
+        "CameraMinZoomDistance": 0.5,
+        "LoadCharacterAppearance": true,
+        "UserEmotesEnabled": false,
+        "CharacterJumpHeight": 0,
+        "CharacterUseJumpPower": false,
+        "DevComputerMovementMode": "KeyboardMouse",
+        "DevTouchMovementMode": "DynamicThumbstick",
+        "EnableMouseLockOption": false,
+        "AutoJumpEnabled": false
+      },
+
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        
+        "$path": "src/starterPlayer/starterPlayerScripts"
+      },
+
+
+      "StarterCharacterScripts": {
+        "$className": "StarterCharacterScripts",
+        
+        "$path": "src/starterPlayer/StarterCharacterScripts"
+      }
+    }
+  }
+}

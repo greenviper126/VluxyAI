@@ -1,0 +1,17 @@
+[package]
+name = "Dash"
+authors = ["hcollins"]
+description = "A collection of core utilities expanding the capabilities of Lua in Roblox."
+repository = "https://github.com/Roblox/dash-internal"
+documentation = "https://roblox.github.io/dash-internal"
+keywords = ["utilities"]
+license = "MIT"
+version = "1.1.0"
+content_root = "src"
+
+[config]
+registry_index = true
+
+[dev_dependencies]
+JestGlobals = "github.com/Roblox/jest-roblox@3.8.0"
+Jest = "github.com/roblox/jest-roblox@3.8.0"
