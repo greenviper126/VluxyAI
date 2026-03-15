@@ -3,18 +3,20 @@
 export type CastingTypes = "Agents" | "Players" | "Both"
 type CastingInput = CastingTypes | RaycastParams
 
+------------------------------------------------------------------------------------------------------------------------
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Trove = require(ReplicatedStorage.Packages.trove)
 
+------------------------------------------------------------------------------------------------------------------------
+
+--[[
+	Base class for agent environments, providing common functionality for observation and action classes.
+]]
 local Environment = {}
 Environment.__index = Environment
-
-local Default = {}
-Default.RayParams = RaycastParams.new()
-Default.RayParams.IgnoreWater = true
-Default.RayParams.FilterType = Enum.RaycastFilterType.Exclude
 
 type self = {
 	entity: Model,
@@ -29,7 +31,7 @@ export type Environment = typeof(setmetatable({} :: self, Environment))
 --[[
 	constructor for Environment class
 
-	@param entity The Model instance representing the agent's character. Must have a PrimaryPart and Humanoid.
+	@param entity Model - the entity
 
 	@return Environment An instance of the Environment class initialized with the given entity.
 ]]
@@ -53,7 +55,7 @@ end
 --[[
 	Returns all the BasePart instances that are part of the agent entity.
 
-	@param self - the object
+	@param self Environment - the object
 
 	@return { BasePart } A list of BasePart instances belonging to the agent.
 ]]
@@ -64,9 +66,9 @@ end
 --[[
 	Returns the PrimaryPart of the agent entity, if it exists.
 	
-	@param self - the object
+	@param self Environment - the object
 
-	@return BasePart? The PrimaryPart of the agent, or nil if not set.
+	@return { BasePart } A list containing the PrimaryParts of all player characters.
 ]]
 function Environment.GetPlayerRoots(self: Environment): { BasePart }
 	local roots = {}
@@ -90,7 +92,7 @@ end
 --[[
 	Returns all the BasePart instances that are part of all player characters.
 	
-	@param self - the object
+	@param self Environment - the object
 
 	@return { BasePart } A list of BasePart instances belonging to all player characters.
 ]]
@@ -139,8 +141,8 @@ end
 --[[
 	Generates RaycastParams to ignore certain sets of objects based on the specified type.
 
-	@param self - the object
-	@param paramType - a string indicating which types of objects to ignore ("Agents", "Players", or "Both")
+	@param self Environment - the object
+	@param paramType CastingTypes - a string indicating which types of objects to ignore ("Agents", "Players", or "Both")
 
 	@return RaycastParams configured to ignore the specified types of objects.
 ]]
@@ -171,8 +173,8 @@ end
 --[[
 	Checks if the path to a position is obstructed based on the given parameters.
 
-	@param position The target position to check obstruction for.
-	@param paramType Optional. Can be a CastingTypes string or RaycastParams. Defaults to "Both".
+	@param position Vector3 - The target position to check obstruction for.
+	@param paramType CastingInput? - Optional. Can be a CastingTypes string or RaycastParams. Defaults to "Both".
 
 	@return RaycastResult? The result of the raycast, or nil if unobstructed.
 ]]
@@ -191,27 +193,10 @@ function Environment.Obstructed(self: Environment, position: Vector3, paramType:
 	return workspace:Raycast(self.primary.Position, direction, params)
 end
 
-function Environment.IsAlive(player: Player): boolean
-	local function hasHealth() -- for default roblox system
-		local humanoid = player.Character and player.Character:FindFirstChildWhichIsA("Humanoid") :: Humanoid or nil
-		if not humanoid then
-			return false
-		end
-
-		return humanoid.Health > 0
-	end
-
-	local function AliveAttribute() -- for custom system
-		return player:GetAttribute("Alive") and true or nil
-	end
-
-	return AliveAttribute() or hasHealth() or false
-end
-
 --[[
 	Cleans up the object.
 
-	@param self - the object
+	@param self Environment - the object
 ]]
 function Environment.Cleanup(self: Environment)
 	self._cleaner:Destroy()
