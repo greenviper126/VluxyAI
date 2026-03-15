@@ -4,7 +4,7 @@ local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 
 --local Builder = require(ServerStorage["FSM-AI"].Builder)
-local RobloxPathfinding = require(ServerStorage["FSM-AI"].Pathfinding.RobloxPathfinding)
+local RobloxPathfinding = require(ServerStorage.VluxyAI.Pathfinding.RobloxPathfinding)
 
 --local States = ServerStorage["FSM-AI"].States
 
