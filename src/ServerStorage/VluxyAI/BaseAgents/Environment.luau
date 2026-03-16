@@ -194,6 +194,24 @@ function Environment.Obstructed(self: Environment, position: Vector3, paramType:
 end
 
 --[[
+	Checks if the position is within the agent's line of sight based on the provided CFrame and range.
+
+	@param self Environment - the object
+	@param cord CFrame - the CFrame representing the agent's position and orientation
+	@param pos2 Vector3 - the position to check visibility for
+	@param range number - the maximum range for visibility check
+
+	@return boolean - True if the position is in sight, false otherwise.
+	@return number - The dot product value indicating how directly the position is in front of the agent (1 is directly in front, -1 is directly behind).
+]]
+function Environment.PosInSightOfCord(self: Environment, cord: CFrame, pos2: Vector3, range: number): (boolean, number)
+	local direction = (pos2 - cord.Position).Unit
+	local product = direction:Dot(cord.LookVector)
+
+	return product > range, product
+end
+
+--[[
 	Cleans up the object.
 
 	@param self Environment - the object

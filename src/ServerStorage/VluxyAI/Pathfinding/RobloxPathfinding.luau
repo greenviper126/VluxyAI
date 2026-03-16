@@ -48,6 +48,11 @@ type SetPathfindingSettings = BasePathfindingSettings<number, boolean>
 
 ------------------------------------------------------------------------------------------------------------------------
 
+table.freeze(DEFAULT_AGENT_SETTINGS)
+table.freeze(DEFAULT_PATHFINDING_SETTINGS)
+
+------------------------------------------------------------------------------------------------------------------------
+
 local PathfindingService = game:GetService("PathfindingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")

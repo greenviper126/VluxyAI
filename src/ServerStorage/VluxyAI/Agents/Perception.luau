@@ -14,9 +14,9 @@ export type SetPerceptionSettings = BasePerceptionSettings<number>
 
 ------------------------------------------------------------------------------------------------------------------------
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+table.freeze(DEFAULT_PERCEPTION_SETTINGS)
 
-local Trove = require(ReplicatedStorage.Packages.trove)
+------------------------------------------------------------------------------------------------------------------------
 
 local Environment = require(script.Parent.Parent.BaseAgents.Environment)
 
@@ -47,7 +47,6 @@ export type Perception = typeof(setmetatable({} :: self, Perception)) & Environm
 ]]
 function Perception.new(entity: Model): Perception
 	local self = setmetatable(Environment.new(entity) :: Perception, Perception)
-	self._cleaner = Trove.new()
 
 	self._target = nil
 
@@ -77,25 +76,6 @@ function Perception.SetPerceptionRange(self: Perception, range: number?)
 end
 
 --[[
-	Checks if the position is within the agent's line of sight based on the provided CFrame and range.
-
-	@param self Perception - the object
-	@param cord CFrame - the CFrame representing the agent's position and orientation
-	@param pos2 Vector3 - the position to check visibility for
-	@param range number? - optional maximum range for visibility check (defaults to agent's visual range)
-
-	@return boolean - True if the position is in sight, false otherwise.
-	@return number - The dot product value indicating how directly the position is in front of the agent (1 is directly in front, -1 is directly behind).
-]]
-function Perception.PosInSightOfCord(self: Perception, cord: CFrame, pos2: Vector3, range: number?): (boolean, number)
-	local realRange = range or self._visualRange
-	local direction = (pos2 - cord.Position).Unit
-	local product = direction:Dot(cord.LookVector)
-
-	return product > realRange, product
-end
-
---[[
 	Is the target in line of sight with no obstructions?
 
 	@param self Perception - the object
@@ -108,7 +88,7 @@ function Perception.AgentSeesTarget(self: Perception): boolean
 	end
 
 	local result = self:Obstructed(self._target.Position)
-	local inSight, _product = self:PosInSightOfCord(self.primary.CFrame, self._target.Position)
+	local inSight, _product = self:PosInSightOfCord(self.primary.CFrame, self._target.Position, self._visualRange)
 
 	if not result and inSight then
 		return true
@@ -127,7 +107,7 @@ end
 ]]
 function Perception.AgentSeesPosition(self: Perception, position: Vector3): boolean
 	local result = self:Obstructed(position)
-	local inSight, _product = self:PosInSightOfCord(self.primary.CFrame, position)
+	local inSight, _product = self:PosInSightOfCord(self.primary.CFrame, position, self._visualRange)
 
 	if not result and inSight then
 		return true
@@ -149,7 +129,7 @@ function Perception.TargetSeesAgent(self: Perception): boolean
 	end
 
 	local result = self:Obstructed(self._target.Position)
-	local inSight, _product = self:PosInSightOfCord(self._target.CFrame, self.primary.Position)
+	local inSight, _product = self:PosInSightOfCord(self._target.CFrame, self.primary.Position, self._visualRange)
 
 	if not result and inSight then
 		return true
@@ -169,7 +149,7 @@ function Perception.PlayersSeeAgent(self: Perception): { BasePart }
 	local roots = {}
 
 	for _, root in ipairs(self:GetPlayerRoots()) do
-		local inSight, _product = self:PosInSightOfCord(root.CFrame, self.primary.Position)
+		local inSight, _product = self:PosInSightOfCord(root.CFrame, self.primary.Position, self._visualRange)
 		local result = self:Obstructed(root.Position)
 
 		if not result and inSight then
