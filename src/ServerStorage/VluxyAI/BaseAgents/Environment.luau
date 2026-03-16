@@ -1,5 +1,10 @@
 --!strict
 
+--[[
+	Note:
+	Maybe agent roots should be stored here instead?
+]]
+
 export type CastingTypes = "Agents" | "Players" | "Both"
 type CastingInput = CastingTypes | RaycastParams
 
