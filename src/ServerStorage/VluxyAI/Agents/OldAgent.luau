@@ -1,5 +1,10 @@
 --!strict
 
+--[[
+	Note:
+	This code is not functional, written 2 years ago.
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 

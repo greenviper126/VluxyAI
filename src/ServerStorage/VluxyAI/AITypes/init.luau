@@ -1,5 +1,10 @@
 --!strict
 
+--[[
+	Note:
+	This file may change or be completely removed in the future.
+]]
+
 export type PathfindingInfo = {
 	AgentRadius: number?,
 	AgentHeight: number?,

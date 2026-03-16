@@ -1,5 +1,10 @@
 --!strict
 
+--[[
+	Note:
+	Internally this module is a mess atm.
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
