@@ -142,13 +142,14 @@ end
 	Checks if any set of players can see the agent without obstructions.
 
 	@param self Perception - the object
+	@param parts { BasePart } - a list of BasePart instances to check for visibility against (e.g., player character parts)
 
 	@return { BasePart } - A list of player root parts that can see the agent.
 ]]
-function Perception.PlayersSeeAgent(self: Perception): { BasePart }
+function Perception.PartsSeeAgent(self: Perception, parts: { BasePart }): { BasePart }
 	local roots = {}
 
-	for _, root in ipairs(self:GetPlayerRoots()) do
+	for _, root in ipairs(parts) do
 		local inSight, _product = self:PosInSightOfCord(root.CFrame, self.primary.Position, self._visualRange)
 		local result = self:Obstructed(root.Position)
 

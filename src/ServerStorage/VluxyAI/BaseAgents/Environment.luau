@@ -69,39 +69,13 @@ function Environment.GetAgentParts(self: Environment): { BasePart }
 end
 
 --[[
-	Returns the PrimaryPart of the agent entity, if it exists.
-	
-	@param self Environment - the object
-
-	@return { BasePart } A list containing the PrimaryParts of all player characters.
-]]
-function Environment.GetPlayerRoots(self: Environment): { BasePart }
-	local roots = {}
-
-	for _, player in pairs(Players:GetPlayers()) do
-		if not player.Character then
-			continue
-		end
-
-		local primary = player.Character.PrimaryPart
-		if not primary then
-			continue
-		end
-
-		table.insert(roots, primary)
-	end
-
-	return roots
-end
-
---[[
-	Returns all the BasePart instances that are part of all player characters.
+	Returns all the BasePart instances that are part of all player characters. Does not check if they are alive.
 	
 	@param self Environment - the object
 
 	@return { BasePart } A list of BasePart instances belonging to all player characters.
 ]]
-function Environment.GetPlayerParts(self: Environment): { BasePart }
+function Environment.GetAllPlayerParts(self: Environment): { BasePart }
 	local parts = {}
 
 	for _, player in pairs(Players:GetPlayers()) do
@@ -163,10 +137,10 @@ function Environment.AvoidParams(self: Environment, paramType: CastingTypes): Ra
 	if paramType == "Agents" then
 		params.FilterDescendantsInstances = self:GetAgentParts() :: { any }
 	elseif paramType == "Players" then
-		params.FilterDescendantsInstances = self:GetPlayerParts() :: { any }
+		params.FilterDescendantsInstances = self:GetAllPlayerParts() :: { any }
 	elseif paramType == "Both" then
 		local agentParts = self:GetAgentParts()
-		local playerParts = self:GetPlayerParts()
+		local playerParts = self:GetAllPlayerParts()
 		local result = append(agentParts, playerParts)
 
 		params.FilterDescendantsInstances = result
@@ -210,10 +184,12 @@ end
 	@return number - The dot product value indicating how directly the position is in front of the agent (1 is directly in front, -1 is directly behind).
 ]]
 function Environment.PosInSightOfCord(self: Environment, cord: CFrame, pos2: Vector3, range: number): (boolean, number)
+	local realRange = math.clamp(range, 0, 1)
+
 	local direction = (pos2 - cord.Position).Unit
 	local product = direction:Dot(cord.LookVector)
 
-	return product > range, product
+	return product > realRange, product
 end
 
 --[[
