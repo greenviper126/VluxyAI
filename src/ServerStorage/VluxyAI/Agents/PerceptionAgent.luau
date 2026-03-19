@@ -18,7 +18,7 @@ table.freeze(DEFAULT_PERCEPTION_SETTINGS)
 
 ------------------------------------------------------------------------------------------------------------------------
 
-local Environment = require(script.Parent.Parent.BaseAgents.Environment)
+local EnvironmentBaseAgent = require(script.Parent.Parent.BaseAgents.EnvironmentBaseAgent)
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ local Environment = require(script.Parent.Parent.BaseAgents.Environment)
 ]]
 local Perception = {}
 Perception.__index = Perception
-setmetatable(Perception, Environment)
+setmetatable(Perception, EnvironmentBaseAgent)
 
 type self = {
 	_target: BasePart?,
@@ -36,7 +36,7 @@ type self = {
 	_visualRange: number,
 }
 
-export type Perception = typeof(setmetatable({} :: self, Perception)) & Environment.Environment
+export type Perception = typeof(setmetatable({} :: self, Perception)) & EnvironmentBaseAgent.Environment
 
 --[[
 	Constructor for Perception class
@@ -46,7 +46,7 @@ export type Perception = typeof(setmetatable({} :: self, Perception)) & Environm
 	@return Perception - An instance of the Perception class initialized with the given entity.
 ]]
 function Perception.new(entity: Model): Perception
-	local self = setmetatable(Environment.new(entity) :: Perception, Perception)
+	local self = setmetatable(EnvironmentBaseAgent.new(entity) :: Perception, Perception)
 
 	self._target = nil
 

@@ -2,7 +2,7 @@
 
 ------------------------------------------------------------------------------------------------------------------------
 
-local Targeting = require(script.Parent.Parent.BaseAgents.Targeting)
+local TargetingBaseAgent = require(script.Parent.Parent.BaseAgents.TargetingBaseAgent)
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -12,11 +12,11 @@ local Targeting = require(script.Parent.Parent.BaseAgents.Targeting)
 ]]
 local Combat = {}
 Combat.__index = Combat
-setmetatable(Combat, Targeting)
+setmetatable(Combat, TargetingBaseAgent)
 
 type self = {}
 
-export type Combat = typeof(setmetatable({} :: self, Combat)) & Targeting.Targeting
+export type Combat = typeof(setmetatable({} :: self, Combat)) & TargetingBaseAgent.Targeting
 
 --[[
 	Constructor for Combat class
@@ -26,7 +26,7 @@ export type Combat = typeof(setmetatable({} :: self, Combat)) & Targeting.Target
 	@return Combat - An instance of the Combat class initialized with the given entity.
 ]]
 function Combat.new(entity: Model): Combat
-	local self = setmetatable(Targeting.new(entity) :: Combat, Combat)
+	local self = setmetatable(TargetingBaseAgent.new(entity) :: Combat, Combat)
 
 	return self
 end

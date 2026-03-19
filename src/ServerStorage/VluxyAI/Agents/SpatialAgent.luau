@@ -24,7 +24,7 @@ table.freeze(DEFAULT_SPATIAL_SETTINGS)
 
 ------------------------------------------------------------------------------------------------------------------------
 
-local Environment = require(script.Parent.Parent.BaseAgents.Environment)
+local EnvironmentBaseAgent = require(script.Parent.Parent.BaseAgents.EnvironmentBaseAgent)
 
 local random = Random.new()
 
@@ -32,7 +32,7 @@ local random = Random.new()
 
 local Spatial = {}
 Spatial.__index = Spatial
-setmetatable(Spatial, Environment)
+setmetatable(Spatial, EnvironmentBaseAgent)
 
 Spatial.Roots = {} :: { BasePart } --read only
 
@@ -40,7 +40,7 @@ type self = {
 	spatialSettings: SetSpatialSettings,
 }
 
-export type Spatial = typeof(setmetatable({} :: self, Spatial)) & Environment.Environment
+export type Spatial = typeof(setmetatable({} :: self, Spatial)) & EnvironmentBaseAgent.Environment
 
 --[[
 	Constructor for Spatial class
@@ -50,7 +50,7 @@ export type Spatial = typeof(setmetatable({} :: self, Spatial)) & Environment.En
 	@return Spatial - An instance of the Spatial class initialized with the given entity.
 ]]
 function Spatial.new(entity: Model): Spatial
-	local self = setmetatable(Environment.new(entity) :: Spatial, Spatial)
+	local self = setmetatable(EnvironmentBaseAgent.new(entity) :: Spatial, Spatial)
 
 	local exists = table.find(Spatial.Roots, self.primary)
 	if not exists then

@@ -46,22 +46,16 @@ export type AgentInfo<N, S> = {
 	AgentCollision: S,
 }
 
-export type Agent = { any }
-
-export type Navigator = { any } --PathfindingSkeleton.Pathfinding
-
-export type RawState = {
-	Transitions: { [string]: (self: State) -> boolean },
-
+export type State = {
 	Start: (self: State) -> (),
-	Update: (self: State, delta: number) -> (),
+	Update: (self: State) -> string?,
 	End: (self: State) -> (),
 }
 
-export type State = RawState & {
-	Agent: Agent,
-	Navigator: Navigator,
-
+export type BlankStateObject = {
+	Agent: any,
+	Pathfinder: any,
+	States: { [string]: State },
 	Data: { [string]: any },
 }
 
