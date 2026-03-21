@@ -32,7 +32,6 @@ local random = Random.new()
 
 local Spatial = {}
 Spatial.__index = Spatial
-setmetatable(Spatial, EnvironmentBaseAgent)
 
 Spatial.Roots = {} :: { BasePart } --read only
 
@@ -50,6 +49,7 @@ export type Spatial = typeof(setmetatable({} :: self, Spatial)) & EnvironmentBas
 	@return Spatial - An instance of the Spatial class initialized with the given entity.
 ]]
 function Spatial.new(entity: Model): Spatial
+	setmetatable(Spatial, EnvironmentBaseAgent)
 	local self = setmetatable(EnvironmentBaseAgent.new(entity) :: Spatial, Spatial)
 
 	local exists = table.find(Spatial.Roots, self.primary)

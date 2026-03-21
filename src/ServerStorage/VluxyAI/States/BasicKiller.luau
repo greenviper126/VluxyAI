@@ -34,13 +34,15 @@ type States = {
 }
 
 type self = {
-	PerceptionAgent: PerceptionAgent.Perception,
-	SpatialAgent: SpatialAgent.Spatial,
+	perceptionAgent: PerceptionAgent.Perception,
+	spatialAgent: SpatialAgent.Spatial,
 
-	Pathfinder: RobloxPathfinding.Pathfinding,
+	pathfinder: RobloxPathfinding.Pathfinding,
 
-	States: States,
-	Data: { [string]: any },
+	states: States,
+	data: { [string]: any },
+
+	fallbackState: string,
 
 	_cleaner: typeof(Trove.new()),
 }
@@ -57,7 +59,8 @@ States.Idle = {
 	Update = function(self)
 		print("Updating Idle State")
 
-		return nil
+		local shouldWalk = math.random(0, 99) < 5
+		return shouldWalk and "Walk" or nil
 	end,
 
 	End = function(self)
@@ -68,16 +71,26 @@ States.Idle = {
 States.Walk = {
 	Start = function(self)
 		print("Starting Walk State")
+
+		self.pathfinder:Toggle(true)
 	end,
 
 	Update = function(self)
-		print("Updating Walk State")
+		if self.pathfinder:GoalMagnitude() < 5 then
+			local currentPosition = self.spatialAgent.primary.Position
+			local newPosition = Vector3.new(math.random(-10, 10), 0, math.random(-10, 10))
 
-		return nil
+			self.pathfinder:MoveTo(currentPosition + newPosition)
+		end
+
+		local shouldIdle = math.random(0, 99) < 10
+		return shouldIdle and "Idle" or nil
 	end,
 
 	End = function(self)
 		print("Ending Walk State")
+
+		self.pathfinder:Toggle(false)
 	end,
 }
 
@@ -100,18 +113,36 @@ function BasicKiller.new(entity: Model): self
 	local self = {}
 	self._cleaner = Trove.new()
 
-	self.PerceptionAgent = PerceptionAgent.new(entity)
-	self.SpatialAgent = SpatialAgent.new(entity)
+	self.fallbackState = "Idle"
 
-	self.Pathfinder = RobloxPathfinding.new(entity)
+	self.states = deepClone(States)
+	self.data = {}
 
-	self.States = deepClone(States)
-	self.Data = {}
+	--agents
+	self.spatialAgent = SpatialAgent.new(entity)
+	self.perceptionAgent = PerceptionAgent.new(entity)
+
+	self.perceptionAgent:SetAgentNetworkOwner(nil)
+	self.perceptionAgent:SetAgentCollisionGroup("Default")
+
+	--pathfinding
+	self.pathfinder = RobloxPathfinding.new(entity)
+		:SetAgentSettings({
+			AgentRadius = 2,
+			WaypointSpacing = 2,
+		})
+		:SetPathSettings({
+			EntitySpeed = 8,
+			VisualizePath = true,
+			PathingUpdateSpeed = 0.25,
+			PredictTargetPosition = false,
+			ShaveDownWaypoints = true,
+		})
 
 	--cleanup
-	self._cleaner:Add(self.PerceptionAgent._cleaner)
-	self._cleaner:Add(self.SpatialAgent._cleaner)
-	self._cleaner:Add(self.Pathfinder._cleaner)
+	self._cleaner:Add(self.perceptionAgent._cleaner)
+	self._cleaner:Add(self.spatialAgent._cleaner)
+	self._cleaner:Add(self.pathfinder._cleaner)
 
 	return self
 end
