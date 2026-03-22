@@ -54,19 +54,12 @@ function Targeting.GetAlivePlayerRoots(self: Targeting): { BasePart }
 	local roots = {}
 
 	for _, player in pairs(Players:GetPlayers()) do
-		if not player.Character then
-			continue
-		end
-		if not self:PlayerIsAlive(player) then
-			continue
-		end
-
-		local primary = player.Character.PrimaryPart
-		if not primary then
+		local root = self:GetAliveRootFromPlayer(player)
+		if not root then
 			continue
 		end
 
-		table.insert(roots, primary)
+		table.insert(roots, root)
 	end
 
 	return roots
@@ -187,6 +180,30 @@ function Targeting.NearestPlayerInBounds(self: Targeting, bounds: number, positi
 	else
 		return nil, math.huge
 	end
+end
+
+--[[
+	Gets the PrimaryPart of a player's character if they are alive.
+
+	@param self Targeting - the object
+	@param player Player - the player to get the PrimaryPart for
+
+	@return BasePart? - the PrimaryPart of the player's character if they are alive, or nil otherwise
+]]
+function Targeting.GetAliveRootFromPlayer(self: Targeting, player: Player): BasePart?
+	if not player.Character then
+		return nil
+	end
+	if not self:PlayerIsAlive(player) then
+		return nil
+	end
+
+	local primary = player.Character.PrimaryPart
+	if not primary then
+		return nil
+	end
+
+	return primary
 end
 
 --[[

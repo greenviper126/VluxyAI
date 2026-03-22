@@ -176,6 +176,7 @@ function Builder._runState(self: Builder, state: State): string
 
 	state.Start(self._stateData)
 
+	--setting to change the update speed should be added in soon
 	local prevTime = os.clock()
 	cleaner:Connect(RunService.Heartbeat, function()
 		if os.clock() - prevTime < 0.1 then

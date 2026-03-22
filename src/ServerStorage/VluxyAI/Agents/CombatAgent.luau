@@ -1,8 +1,13 @@
 --!strict
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 ------------------------------------------------------------------------------------------------------------------------
 
-local TargetingBaseAgent = require(script.Parent.Parent.BaseAgents.TargetingBaseAgent)
+local Trove = require(ReplicatedStorage.Packages.trove)
+
+local vluxyAI = script.Parent.Parent
+
+local TargetingBaseAgent = require(vluxyAI.BaseAgents.TargetingBaseAgent)
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -12,11 +17,16 @@ local TargetingBaseAgent = require(script.Parent.Parent.BaseAgents.TargetingBase
 ]]
 local Combat = {}
 Combat.__index = Combat
-setmetatable(Combat, TargetingBaseAgent)
 
-type self = {}
+type self = {
+	entity: Model,
 
-export type Combat = typeof(setmetatable({} :: self, Combat)) & TargetingBaseAgent.Targeting
+	_targetingBaseAgent: TargetingBaseAgent.Targeting,
+
+	_cleaner: typeof(Trove.new()),
+}
+
+export type Combat = typeof(setmetatable({} :: self, Combat))
 
 --[[
 	Constructor for Combat class
@@ -25,8 +35,13 @@ export type Combat = typeof(setmetatable({} :: self, Combat)) & TargetingBaseAge
 
 	@return Combat - An instance of the Combat class initialized with the given entity.
 ]]
-function Combat.new(entity: Model): Combat
-	local self = setmetatable(TargetingBaseAgent.new(entity) :: Combat, Combat)
+function Combat.new(entity: Model, targetingBaseAgent: TargetingBaseAgent.Targeting): Combat
+	local self = setmetatable({} :: self, Combat)
+	self._cleaner = Trove.new()
+
+	self.entity = entity
+
+	self._targetingBaseAgent = targetingBaseAgent
 
 	return self
 end
@@ -40,7 +55,7 @@ end
 	@param damage number - the amount of damage to apply to players within distance
 ]]
 function Combat.DamagePlayerInBounds(self: Combat, position: Vector3, distance: number, damage: number)
-	local player, dist = self:NearestPlayer(position)
+	local player, dist = self._targetingBaseAgent:NearestPlayer(position)
 
 	if player and dist < distance then
 		self:DamagePlayer(player, damage)
@@ -65,6 +80,15 @@ function Combat.DamagePlayer(self: Combat, player: Player, damage: number)
 	end
 
 	humanoid:TakeDamage(damage)
+end
+
+--[[
+	Cleans up the object.
+
+	@param self Combat - the object
+]]
+function Combat.Cleanup(self: Combat)
+	self._cleaner:Destroy()
 end
 
 return Combat

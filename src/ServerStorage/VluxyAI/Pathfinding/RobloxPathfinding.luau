@@ -336,6 +336,10 @@ function Pathfinding.Run(self: Pathfinding): Pathfinding
 		self.humanoid.WalkSpeed = self.pathfindingSettings.EntitySpeed
 	end)
 
+	runCleaner:Add(function()
+		self.humanoid:MoveTo(self.primary.Position)
+	end)
+
 	--after physics simulation
 	local prevTargetPos = self._targetPart.Position
 	runCleaner:Connect(RunService.Heartbeat, function(delta: number)

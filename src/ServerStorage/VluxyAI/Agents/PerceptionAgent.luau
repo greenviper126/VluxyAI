@@ -1,7 +1,8 @@
 --!strict
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local DEFAULT_PERCEPTION_SETTINGS: SetPerceptionSettings = {
-	VisualRange = 10,
+	VisualRange = 0.2,
 }
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -18,7 +19,11 @@ table.freeze(DEFAULT_PERCEPTION_SETTINGS)
 
 ------------------------------------------------------------------------------------------------------------------------
 
-local EnvironmentBaseAgent = require(script.Parent.Parent.BaseAgents.EnvironmentBaseAgent)
+local Trove = require(ReplicatedStorage.Packages.trove)
+
+local vluxyAI = script.Parent.Parent
+
+local EnvironmentBaseAgent = require(vluxyAI.BaseAgents.EnvironmentBaseAgent)
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -28,15 +33,19 @@ local EnvironmentBaseAgent = require(script.Parent.Parent.BaseAgents.Environment
 ]]
 local Perception = {}
 Perception.__index = Perception
-setmetatable(Perception, EnvironmentBaseAgent)
 
 type self = {
-	_target: BasePart?,
+	entity: Model,
 
+	_target: BasePart?,
 	_visualRange: number,
+
+	_environmentBaseAgent: EnvironmentBaseAgent.Environment,
+
+	_cleaner: typeof(Trove.new()),
 }
 
-export type Perception = typeof(setmetatable({} :: self, Perception)) & EnvironmentBaseAgent.Environment
+export type Perception = typeof(setmetatable({} :: self, Perception))
 
 --[[
 	Constructor for Perception class
@@ -45,8 +54,13 @@ export type Perception = typeof(setmetatable({} :: self, Perception)) & Environm
 
 	@return Perception - An instance of the Perception class initialized with the given entity.
 ]]
-function Perception.new(entity: Model): Perception
-	local self = setmetatable(EnvironmentBaseAgent.new(entity) :: Perception, Perception)
+function Perception.new(entity: Model, environmentBaseAgent: EnvironmentBaseAgent.Environment): Perception
+	local self = setmetatable({} :: self, Perception)
+	self._cleaner = Trove.new()
+
+	self._environmentBaseAgent = environmentBaseAgent
+
+	self.entity = entity
 
 	self._target = nil
 
@@ -87,8 +101,12 @@ function Perception.AgentSeesTarget(self: Perception): boolean
 		return false
 	end
 
-	local result = self:Obstructed(self._target.Position)
-	local inSight, _product = self:PosInSightOfCord(self.primary.CFrame, self._target.Position, self._visualRange)
+	local result = self._environmentBaseAgent:Obstructed(self._target.Position)
+	local inSight, _product = self._environmentBaseAgent:PosInSightOfCord(
+		self._environmentBaseAgent.primary.CFrame,
+		self._target.Position,
+		self._visualRange
+	)
 
 	if not result and inSight then
 		return true
@@ -106,8 +124,12 @@ end
 	@return boolean - True if the agent can see the position without obstructions, false otherwise.
 ]]
 function Perception.AgentSeesPosition(self: Perception, position: Vector3): boolean
-	local result = self:Obstructed(position)
-	local inSight, _product = self:PosInSightOfCord(self.primary.CFrame, position, self._visualRange)
+	local result = self._environmentBaseAgent:Obstructed(position)
+	local inSight, _product = self._environmentBaseAgent:PosInSightOfCord(
+		self._environmentBaseAgent.primary.CFrame,
+		position,
+		self._visualRange
+	)
 
 	if not result and inSight then
 		return true
@@ -128,8 +150,12 @@ function Perception.TargetSeesAgent(self: Perception): boolean
 		return false
 	end
 
-	local result = self:Obstructed(self._target.Position)
-	local inSight, _product = self:PosInSightOfCord(self._target.CFrame, self.primary.Position, self._visualRange)
+	local result = self._environmentBaseAgent:Obstructed(self._target.Position)
+	local inSight, _product = self._environmentBaseAgent:PosInSightOfCord(
+		self._target.CFrame,
+		self._environmentBaseAgent.primary.Position,
+		self._visualRange
+	)
 
 	if not result and inSight then
 		return true
@@ -150,8 +176,12 @@ function Perception.PartsSeeAgent(self: Perception, parts: { BasePart }): { Base
 	local roots = {}
 
 	for _, root in ipairs(parts) do
-		local inSight, _product = self:PosInSightOfCord(root.CFrame, self.primary.Position, self._visualRange)
-		local result = self:Obstructed(root.Position)
+		local inSight, _product = self._environmentBaseAgent:PosInSightOfCord(
+			root.CFrame,
+			self._environmentBaseAgent.primary.Position,
+			self._visualRange
+		)
+		local result = self._environmentBaseAgent:Obstructed(root.Position)
 
 		if not result and inSight then
 			table.insert(roots, root)
@@ -159,6 +189,15 @@ function Perception.PartsSeeAgent(self: Perception, parts: { BasePart }): { Base
 	end
 
 	return roots
+end
+
+--[[
+	Cleans up the object.
+
+	@param self Perception - the object
+]]
+function Perception.Cleanup(self: Perception)
+	self._cleaner:Destroy()
 end
 
 return Perception

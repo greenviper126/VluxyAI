@@ -10,12 +10,16 @@
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
 
 local Trove = require(ReplicatedStorage.Packages.trove)
 
 local VluxyAI = script.Parent.Parent
 
 local RobloxPathfinding = require(VluxyAI.Pathfinding.RobloxPathfinding)
+
+local EnvironmentBaseAgent = require(ServerStorage.VluxyAI.BaseAgents.EnvironmentBaseAgent)
+local TargetingBaseAgent = require(ServerStorage.VluxyAI.BaseAgents.TargetingBaseAgent)
 
 local PerceptionAgent = require(VluxyAI.Agents.PerceptionAgent)
 local SpatialAgent = require(VluxyAI.Agents.SpatialAgent)
@@ -30,10 +34,13 @@ type State = {
 
 type States = {
 	Idle: State,
-	Walk: State,
+	Target: State,
 }
 
 type self = {
+	environmentBaseAgent: EnvironmentBaseAgent.Environment,
+	targetingBaseAgent: TargetingBaseAgent.Targeting,
+
 	perceptionAgent: PerceptionAgent.Perception,
 	spatialAgent: SpatialAgent.Spatial,
 
@@ -54,13 +61,31 @@ local States = {} :: States
 States.Idle = {
 	Start = function(self)
 		print("Starting Idle State")
+
+		self.pathfinder:Toggle(false)
 	end,
 
 	Update = function(self)
 		print("Updating Idle State")
 
-		local shouldWalk = math.random(0, 99) < 5
-		return shouldWalk and "Walk" or nil
+		local player, _dist = self.targetingBaseAgent:NearestPlayerInBounds(15)
+
+		if player then
+			local root = self.targetingBaseAgent:GetAliveRootFromPlayer(player)
+			if not root then
+				return nil
+			end
+			local isSpotted = self.perceptionAgent:AgentSeesPosition(root.Position)
+			if not isSpotted then
+				return nil
+			end
+
+			self.perceptionAgent:SetTarget(root)
+
+			return "Target"
+		else
+			return nil
+		end
 	end,
 
 	End = function(self)
@@ -68,27 +93,29 @@ States.Idle = {
 	end,
 }
 
-States.Walk = {
+States.Target = {
 	Start = function(self)
-		print("Starting Walk State")
+		print("Starting Target State")
 
 		self.pathfinder:Toggle(true)
 	end,
 
 	Update = function(self)
-		if self.pathfinder:GoalMagnitude() < 5 then
-			local currentPosition = self.spatialAgent.primary.Position
-			local newPosition = Vector3.new(math.random(-10, 10), 0, math.random(-10, 10))
-
-			self.pathfinder:MoveTo(currentPosition + newPosition)
+		if not self.perceptionAgent._target then
+			return "Idle"
 		end
 
-		local shouldIdle = math.random(0, 99) < 10
-		return shouldIdle and "Idle" or nil
+		if not self.perceptionAgent:AgentSeesTarget() then
+			return "Idle"
+		end
+
+		self.pathfinder:MoveTo(self.perceptionAgent._target.Position)
+
+		return nil
 	end,
 
 	End = function(self)
-		print("Ending Walk State")
+		print("Ending Target State")
 
 		self.pathfinder:Toggle(false)
 	end,
@@ -119,11 +146,14 @@ function BasicKiller.new(entity: Model): self
 	self.data = {}
 
 	--agents
-	self.spatialAgent = SpatialAgent.new(entity)
-	self.perceptionAgent = PerceptionAgent.new(entity)
+	self.environmentBaseAgent = EnvironmentBaseAgent.new(entity)
+	self.targetingBaseAgent = TargetingBaseAgent.new(entity)
 
-	self.perceptionAgent:SetAgentNetworkOwner(nil)
-	self.perceptionAgent:SetAgentCollisionGroup("Default")
+	self.spatialAgent = SpatialAgent.new(entity, self.environmentBaseAgent)
+	self.perceptionAgent = PerceptionAgent.new(entity, self.environmentBaseAgent)
+
+	self.environmentBaseAgent:SetAgentNetworkOwner(nil)
+	self.environmentBaseAgent:SetAgentCollisionGroup("Default")
 
 	--pathfinding
 	self.pathfinder = RobloxPathfinding.new(entity)
@@ -140,8 +170,12 @@ function BasicKiller.new(entity: Model): self
 		})
 
 	--cleanup
+	self._cleaner:Add(self.environmentBaseAgent._cleaner)
+	self._cleaner:Add(self.targetingBaseAgent._cleaner)
+
 	self._cleaner:Add(self.perceptionAgent._cleaner)
 	self._cleaner:Add(self.spatialAgent._cleaner)
+
 	self._cleaner:Add(self.pathfinder._cleaner)
 
 	return self
