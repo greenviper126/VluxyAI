@@ -14,7 +14,7 @@ local Trove = require(ReplicatedStorage.Packages.trove)
 
 ------------------------------------------------------------------------------------------------------------------------
 
-local VluxyAI = script.Parent.Parent
+local VluxyAI = script.Parent
 
 local RobloxPathfinding = require(VluxyAI.Pathfinding.RobloxPathfinding)
 
@@ -45,6 +45,8 @@ export type StandardStater = {
 } & StateData
 
 type StateData = {
+	entity: Model,
+
 	states: { [string]: State<any> },
 	data: { [string]: any },
 
@@ -131,6 +133,8 @@ end
 function Builder.SetStandardStateData(self: Builder, States: { [string]: State<any> }): Builder
 	local stater = {}
 	stater._cleaner = Trove.new()
+
+	stater.entity = self.entity
 
 	stater.states = deepClone(States)
 	stater.fallbackState = "unknown"

@@ -6,9 +6,9 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local VluxyAI = ServerStorage.VluxyAI
 
-local BasicKillerStates = require(VluxyAI.States.BasicKiller)
+local BasicKillerStates = require(VluxyAI.BasicStates.Killer)
 
-local Builder = require(VluxyAI.Builders.SPSMBuilder)
+local Builder = require(VluxyAI.AIBuilder)
 
 ------------------------------------------------------------------------------------------------------------------------
 

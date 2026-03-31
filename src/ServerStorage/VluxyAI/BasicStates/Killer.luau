@@ -2,7 +2,18 @@
 
 local VluxyAI = script.Parent.Parent
 
-local SPSMBuilder = require(VluxyAI.Builders.SPSMBuilder)
+local NPCAnimator = require(VluxyAI.Animator.NPCAnimator)
+local SPSMBuilder = require(VluxyAI.AIBuilder)
+
+------------------------------------------------------------------------------------------------------------------------
+
+local animationInfo = {
+	Idle = { ID = 0, WEIGHTED = true, PRIORITY = Enum.AnimationPriority.Idle } :: NPCAnimator.ANIMATION_INFO,
+	Walk = { ID = 0, WEIGHTED = true, PRIORITY = Enum.AnimationPriority.Movement } :: NPCAnimator.ANIMATION_INFO,
+	Run = { ID = 0, WEIGHTED = true, PRIORITY = Enum.AnimationPriority.Movement } :: NPCAnimator.ANIMATION_INFO,
+}
+
+type NPCAnimator = typeof(NPCAnimator.new(Instance.new("Model"), animationInfo))
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -14,6 +25,7 @@ type States = {
 
 type self = SPSMBuilder.StandardStater & {
 	states: States,
+	animator: NPCAnimator,
 	data: {},
 }
 
@@ -30,6 +42,7 @@ local States = {
 function States.Init.Start(self)
 	self.fallbackState = "Idle"
 
+	--pathfinding setup
 	self.pathfinder:SetAgentSettings({
 		AgentRadius = 2,
 		WaypointSpacing = 2,
@@ -42,6 +55,10 @@ function States.Init.Start(self)
 		PredictTargetPosition = false,
 		ShaveDownWaypoints = true,
 	})
+
+	--animation setup
+	self.animator = NPCAnimator.new(self.entity, animationInfo)
+	self.animator:Build()
 end
 
 function States.Init.Update(self)
