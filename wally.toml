@@ -25,7 +25,5 @@ private = true
 
 #main:
 trove = "sleitnick/trove@1.5.0"
-dash = "dev-alastair/dash@1.1.2" #for tables / has intellisense
-promise = "evaera/promise@4.0.0" #for some bug prevention
 
 #optional:
