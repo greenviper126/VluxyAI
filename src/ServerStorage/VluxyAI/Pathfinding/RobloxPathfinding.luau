@@ -408,6 +408,7 @@ end
 function Pathfinding.MoveToYield(self: Pathfinding, destination: Vector3): Pathfinding
 	self:MoveTo(destination)
 
+	--this might yield infinitely on cleanup in some cases. But, it works for now.
 	repeat
 		task.wait()
 	until not self._pathing

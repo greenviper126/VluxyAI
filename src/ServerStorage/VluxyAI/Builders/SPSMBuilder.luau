@@ -8,21 +8,52 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local ServerStorage = game:GetService("ServerStorage")
 
 local Trove = require(ReplicatedStorage.Packages.trove)
 
-type State = {
-	Start: (self: any) -> (),
-	Update: (self: any) -> string?,
-	End: (self: any) -> (),
+------------------------------------------------------------------------------------------------------------------------
+
+local VluxyAI = script.Parent.Parent
+
+local RobloxPathfinding = require(VluxyAI.Pathfinding.RobloxPathfinding)
+
+local EnvironmentBaseAgent = require(VluxyAI.BaseAgents.EnvironmentBaseAgent)
+local TargetingBaseAgent = require(VluxyAI.BaseAgents.TargetingBaseAgent)
+
+local CombatAgent = require(ServerStorage.VluxyAI.Agents.CombatAgent)
+local PerceptionAgent = require(VluxyAI.Agents.PerceptionAgent)
+local SpatialAgent = require(VluxyAI.Agents.SpatialAgent)
+
+------------------------------------------------------------------------------------------------------------------------
+
+export type State<self> = {
+	Start: (self: self) -> (),
+	Update: (self: self) -> string?,
+	End: (self: self) -> (),
 }
 
+export type StandardStater = {
+	environmentBaseAgent: EnvironmentBaseAgent.Environment,
+	targetingBaseAgent: TargetingBaseAgent.Targeting,
+
+	perceptionAgent: PerceptionAgent.Perception,
+	spatialAgent: SpatialAgent.Spatial,
+	combatAgent: CombatAgent.Combat,
+
+	pathfinder: RobloxPathfinding.Pathfinding,
+} & StateData
+
 type StateData = {
-	states: { [string]: State },
+	states: { [string]: State<any> },
+	data: { [string]: any },
+
 	fallbackState: string,
 
 	_cleaner: typeof(Trove.new()),
 }
+
+------------------------------------------------------------------------------------------------------------------------
 
 type self = {
 	entity: Model,
@@ -34,6 +65,21 @@ type self = {
 
 	_cleaner: typeof(Trove.new()),
 }
+
+------------------------------------------------------------------------------------------------------------------------
+
+--[[
+	Deep clones a table.
+]]
+local function deepClone<T>(t: T): T
+	local clone = {}
+	for k, v in t :: any do
+		clone[k] = type(v) == "table" and deepClone(v) or v
+	end
+	return clone :: any
+end
+
+------------------------------------------------------------------------------------------------------------------------
 
 --[[
     Builder Class for State Pattern State Machines (SPSM).
@@ -74,6 +120,49 @@ function Builder._startCheck(self: Builder)
 end
 
 --[[
+	Sets the standard agents and pathfinder for the FSM-AI. This is a helper function to quickly set up a standard FSM-AI with the provided states and fallback state.
+
+	@param entity - the entity to set up the FSM-AI on
+	@param States - the states for the FSM-AI
+	@param fallbackState - the fallback state for the FSM-AI
+
+	@return StateData - the state data object for the FSM-AI
+]]
+function Builder.SetStandard(entity: Model, States: { [string]: State<any> }): StateData
+	local self = {}
+	self._cleaner = Trove.new()
+
+	self.states = deepClone(States)
+	self.fallbackState = "unknown"
+	self.data = {}
+
+	--agents
+	self.environmentBaseAgent = EnvironmentBaseAgent.new(entity)
+	self.targetingBaseAgent = TargetingBaseAgent.new(entity)
+
+	self.spatialAgent = SpatialAgent.new(entity, self.environmentBaseAgent)
+	self.perceptionAgent = PerceptionAgent.new(entity, self.environmentBaseAgent)
+	self.combatAgent = CombatAgent.new(entity, self.targetingBaseAgent)
+
+	self.environmentBaseAgent:SetAgentNetworkOwner(nil)
+	self.environmentBaseAgent:SetAgentCollisionGroup("Default")
+
+	--pathfinding
+	self.pathfinder = RobloxPathfinding.new(entity)
+
+	--cleanup
+	self._cleaner:Add(self.environmentBaseAgent._cleaner)
+	self._cleaner:Add(self.targetingBaseAgent._cleaner)
+	self._cleaner:Add(self.combatAgent._cleaner)
+	self._cleaner:Add(self.perceptionAgent._cleaner)
+	self._cleaner:Add(self.spatialAgent._cleaner)
+
+	self._cleaner:Add(self.pathfinder._cleaner)
+
+	return self
+end
+
+--[[
     Sets the state data for the FSM-AI.
 
     @param self - the object
@@ -110,6 +199,7 @@ function Builder.Build(self: Builder): Builder
 
 	--validate state data
 	for stateName, state in self._stateData.states do
+		--check if types are correct
 		if type(state.Start) ~= "function" then
 			error("State " .. stateName .. " is missing a Start function!")
 		end
@@ -120,6 +210,19 @@ function Builder.Build(self: Builder): Builder
 
 		if type(state.End) ~= "function" then
 			error("State " .. stateName .. " is missing an End function!")
+		end
+
+		--check if functions are valid
+		if not state.Update then
+			error("Update function not provided for " .. stateName .. "!")
+		end
+
+		if not state.End then
+			state.End = function() end
+		end
+
+		if not state.Start then
+			state.Start = function() end
 		end
 	end
 
@@ -164,12 +267,14 @@ end
 --[[
 	Runs the state and returns the next state name. If the next state name is nil, it will return the fallback state.
 
+	@yields
+
 	@param self - the object
 	@param state - the state to run
 
 	@return string - the name of the next state
 ]]
-function Builder._runState(self: Builder, state: State): string
+function Builder._runState(self: Builder, state: State<any>): string
 	local nextStateName: string = nil
 	local cleaner = self._cleaner:Extend()
 	local stateChanged = cleaner:Add(Instance.new("BindableEvent"))
@@ -208,7 +313,7 @@ end
 
 	@return State - the state object
 ]]
-function Builder._getStateFromName(self: Builder, stateName: string?): State
+function Builder._getStateFromName(self: Builder, stateName: string?): State<any>
 	if stateName == nil then
 		warn("No state was provided, going to fallback state! " .. self.entity:GetFullName())
 
