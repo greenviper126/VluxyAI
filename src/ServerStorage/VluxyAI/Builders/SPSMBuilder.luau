@@ -128,36 +128,38 @@ end
 
 	@return StateData - the state data object for the FSM-AI
 ]]
-function Builder.SetStandard(entity: Model, States: { [string]: State<any> }): StateData
-	local self = {}
-	self._cleaner = Trove.new()
+function Builder.SetStandardStateData(self: Builder, States: { [string]: State<any> }): Builder
+	local stater = {}
+	stater._cleaner = Trove.new()
 
-	self.states = deepClone(States)
-	self.fallbackState = "unknown"
-	self.data = {}
+	stater.states = deepClone(States)
+	stater.fallbackState = "unknown"
+	stater.data = {}
 
 	--agents
-	self.environmentBaseAgent = EnvironmentBaseAgent.new(entity)
-	self.targetingBaseAgent = TargetingBaseAgent.new(entity)
+	stater.environmentBaseAgent = EnvironmentBaseAgent.new(self.entity)
+	stater.targetingBaseAgent = TargetingBaseAgent.new(self.entity)
 
-	self.spatialAgent = SpatialAgent.new(entity, self.environmentBaseAgent)
-	self.perceptionAgent = PerceptionAgent.new(entity, self.environmentBaseAgent)
-	self.combatAgent = CombatAgent.new(entity, self.targetingBaseAgent)
+	stater.spatialAgent = SpatialAgent.new(self.entity, stater.environmentBaseAgent)
+	stater.perceptionAgent = PerceptionAgent.new(self.entity, stater.environmentBaseAgent)
+	stater.combatAgent = CombatAgent.new(self.entity, stater.targetingBaseAgent)
 
-	self.environmentBaseAgent:SetAgentNetworkOwner(nil)
-	self.environmentBaseAgent:SetAgentCollisionGroup("Default")
+	stater.environmentBaseAgent:SetAgentNetworkOwner(nil)
+	stater.environmentBaseAgent:SetAgentCollisionGroup("Default")
 
 	--pathfinding
-	self.pathfinder = RobloxPathfinding.new(entity)
+	stater.pathfinder = RobloxPathfinding.new(self.entity)
 
 	--cleanup
-	self._cleaner:Add(self.environmentBaseAgent._cleaner)
-	self._cleaner:Add(self.targetingBaseAgent._cleaner)
-	self._cleaner:Add(self.combatAgent._cleaner)
-	self._cleaner:Add(self.perceptionAgent._cleaner)
-	self._cleaner:Add(self.spatialAgent._cleaner)
+	stater._cleaner:Add(stater.environmentBaseAgent._cleaner)
+	stater._cleaner:Add(stater.targetingBaseAgent._cleaner)
+	stater._cleaner:Add(stater.combatAgent._cleaner)
+	stater._cleaner:Add(stater.perceptionAgent._cleaner)
+	stater._cleaner:Add(stater.spatialAgent._cleaner)
 
-	self._cleaner:Add(self.pathfinder._cleaner)
+	stater._cleaner:Add(stater.pathfinder._cleaner)
+
+	self:SetStateData(stater)
 
 	return self
 end
